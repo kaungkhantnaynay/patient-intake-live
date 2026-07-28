@@ -15,16 +15,16 @@ const routes = [
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-slate-50 px-6 py-10 text-slate-950">
+    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-5xl flex-col justify-center">
-        <p className="text-sm font-semibold uppercase tracking-[0.12em] text-teal-700">
+        <p className="text-sm font-semibold uppercase tracking-[0.12em] text-agnos-blue">
           Agnos Assessment
         </p>
         <div className="mt-4 max-w-3xl">
-          <h1 className="text-4xl font-semibold tracking-normal text-slate-950 sm:text-5xl">
+          <h1 className="text-4xl font-semibold tracking-normal text-foreground sm:text-5xl">
             Real-time patient intake
           </h1>
-          <p className="mt-5 text-lg leading-8 text-slate-700">
+          <p className="mt-5 text-lg leading-8 text-agnos-muted">
             Choose an interface to review the Phase 1 application skeleton. The
             shared intake schema is ready for the patient form and staff
             dashboard work in the next phase.
@@ -36,15 +36,15 @@ export default function Home() {
             <Link
               key={route.href}
               href={route.href}
-              className="group rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition hover:border-teal-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2"
+              className="group rounded-lg border border-agnos-border bg-agnos-surface p-6 shadow-sm shadow-blue-950/5 transition hover:border-agnos-cyan hover:shadow-md focus:outline-none focus:ring-2 focus:ring-agnos-blue focus:ring-offset-2"
             >
-              <span className="text-xl font-semibold text-slate-950">
+              <span className="text-xl font-semibold text-foreground">
                 {route.title}
               </span>
-              <span className="mt-3 block leading-7 text-slate-600">
+              <span className="mt-3 block leading-7 text-agnos-muted">
                 {route.description}
               </span>
-              <span className="mt-5 inline-flex text-sm font-semibold text-teal-700 group-hover:text-teal-800">
+              <span className="mt-5 inline-flex text-sm font-semibold text-agnos-blue group-hover:text-agnos-blue-dark">
                 Open {route.title}
               </span>
             </Link>
