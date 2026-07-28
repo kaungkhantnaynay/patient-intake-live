@@ -1,5 +1,12 @@
 export type PatientStatus = "inactive" | "active" | "submitted";
 
+export type IntakeConnectionState =
+  | "connecting"
+  | "connected"
+  | "disconnected";
+
+export type IntakeRealtimeTransport = "supabase" | "local";
+
 export type PatientIntakeField =
   | "firstName"
   | "middleName"

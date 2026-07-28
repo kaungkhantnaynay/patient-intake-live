@@ -1,9 +1,15 @@
-import type { PatientStatus } from "@/lib/intake/types";
+import type {
+  IntakeConnectionState,
+  IntakeRealtimeTransport,
+  PatientStatus,
+} from "@/lib/intake/types";
 
 type FormProgressProps = {
   completedFields: number;
+  connectionState: IntakeConnectionState;
   requiredFields: number;
   status: PatientStatus;
+  transport: IntakeRealtimeTransport;
 };
 
 const statusLabels: Record<PatientStatus, string> = {
@@ -14,13 +20,23 @@ const statusLabels: Record<PatientStatus, string> = {
 
 export function FormProgress({
   completedFields,
+  connectionState,
   requiredFields,
   status,
+  transport,
 }: FormProgressProps) {
   const progress =
     requiredFields === 0
       ? 0
       : Math.round((completedFields / requiredFields) * 100);
+  const connectionLabel =
+    connectionState === "connected"
+      ? transport === "supabase"
+        ? "Live sync connected"
+        : "Local demo sync"
+      : connectionState === "connecting"
+        ? "Connecting sync"
+        : "Sync unavailable";
 
   return (
     <div className="rounded-lg border border-agnos-border bg-agnos-surface p-5 shadow-sm shadow-blue-950/5">
@@ -53,6 +69,22 @@ export function FormProgress({
 
       <p className="mt-3 text-sm text-agnos-muted">
         {progress}% complete. You can submit once every required field is filled.
+      </p>
+      <p
+        className="mt-2 flex items-center gap-2 text-xs font-semibold text-agnos-muted"
+        aria-live="polite"
+      >
+        <span
+          className={`h-2 w-2 rounded-full ${
+            connectionState === "connected"
+              ? "bg-emerald-500"
+              : connectionState === "connecting"
+                ? "bg-amber-500"
+                : "bg-rose-500"
+          }`}
+          aria-hidden="true"
+        />
+        {connectionLabel}
       </p>
     </div>
   );

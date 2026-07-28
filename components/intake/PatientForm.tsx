@@ -14,7 +14,14 @@ import {
   validateIntakeField,
   validatePatientIntake,
 } from "@/lib/intake/validation";
+import {
+  createIntakeRealtimeConnection,
+  type IntakeRealtimeConnection,
+} from "@/lib/intake/realtime";
 import type {
+  IntakeConnectionState,
+  IntakeRealtimeEvent,
+  IntakeRealtimeTransport,
   IntakeValidationErrors,
   PatientIntake,
   PatientIntakeField,
@@ -30,6 +37,13 @@ export function PatientForm() {
   const [errors, setErrors] = useState<IntakeValidationErrors>({});
   const [touched, setTouched] = useState<TouchedFields>({});
   const [status, setStatus] = useState<PatientStatus>("inactive");
+  const [connectionState, setConnectionState] =
+    useState<IntakeConnectionState>("connecting");
+  const [transport, setTransport] =
+    useState<IntakeRealtimeTransport>("local");
+  const dataRef = useRef<PatientIntake>(emptyPatientIntake);
+  const statusRef = useRef<PatientStatus>("inactive");
+  const realtimeRef = useRef<IntakeRealtimeConnection | null>(null);
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [submittedAt, setSubmittedAt] = useState<string | null>(null);
 
@@ -40,36 +54,89 @@ export function PatientForm() {
   );
 
   useEffect(() => {
+    function publishCurrentSnapshot() {
+      const snapshot: IntakeRealtimeEvent = {
+        type: "form:replace",
+        data: dataRef.current,
+        status: statusRef.current,
+        updatedAt: new Date().toISOString(),
+      };
+
+      void realtimeRef.current?.publish(snapshot);
+    }
+
+    const connection = createIntakeRealtimeConnection({
+      onConnectionChange: (nextState, nextTransport) => {
+        setConnectionState(nextState);
+        setTransport(nextTransport);
+
+        if (nextState === "connected") {
+          publishCurrentSnapshot();
+        }
+      },
+      onEvent: () => undefined,
+      onSnapshotRequest: publishCurrentSnapshot,
+    });
+
+    realtimeRef.current = connection;
+
     return () => {
       if (idleTimerRef.current) {
         clearTimeout(idleTimerRef.current);
       }
+
+      connection.disconnect();
+      realtimeRef.current = null;
     };
   }, []);
 
+  function publish(event: IntakeRealtimeEvent) {
+    void realtimeRef.current?.publish(event);
+  }
+
+  function updateStatus(nextStatus: PatientStatus) {
+    if (statusRef.current === nextStatus) {
+      return;
+    }
+
+    statusRef.current = nextStatus;
+    setStatus(nextStatus);
+    publish({
+      type: "status:update",
+      status: nextStatus,
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
   function markActive() {
-    setStatus((currentStatus) =>
-      currentStatus === "submitted" ? currentStatus : "active",
-    );
+    updateStatus("active");
 
     if (idleTimerRef.current) {
       clearTimeout(idleTimerRef.current);
     }
 
     idleTimerRef.current = setTimeout(() => {
-      setStatus((currentStatus) =>
-        currentStatus === "submitted" ? currentStatus : "inactive",
-      );
+      updateStatus("inactive");
+      idleTimerRef.current = null;
     }, idleTimeoutMs);
   }
 
   function handleFieldChange(field: PatientIntakeField, value: string) {
     markActive();
     setSubmittedAt(null);
-    setData((currentData) => ({
-      ...currentData,
+    const nextData = {
+      ...dataRef.current,
       [field]: value,
-    }));
+    };
+
+    dataRef.current = nextData;
+    setData(nextData);
+    publish({
+      type: "field:update",
+      field,
+      value,
+      updatedAt: new Date().toISOString(),
+    });
 
     if (touched[field]) {
       setErrors((currentErrors) => ({
@@ -116,16 +183,27 @@ export function PatientForm() {
       idleTimerRef.current = null;
     }
 
+    const submissionTime = new Date();
+
+    statusRef.current = "submitted";
     setStatus("submitted");
-    setSubmittedAt(new Date().toLocaleString());
+    publish({
+      type: "form:replace",
+      data: dataRef.current,
+      status: "submitted",
+      updatedAt: submissionTime.toISOString(),
+    });
+    setSubmittedAt(submissionTime.toLocaleString());
   }
 
   return (
     <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
       <FormProgress
         completedFields={completedRequiredFields}
+        connectionState={connectionState}
         requiredFields={requiredIntakeFields.length}
         status={status}
+        transport={transport}
       />
 
       {Object.entries(intakeSections).map(([section, title], index) => {
