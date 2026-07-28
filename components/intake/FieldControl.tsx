@@ -15,7 +15,7 @@ type FieldControlProps = {
 };
 
 const inputClassName =
-  "mt-2 w-full rounded-lg border bg-white px-3.5 py-3 text-sm text-foreground outline-none transition placeholder:text-agnos-muted/70 focus:ring-2 focus:ring-agnos-blue/30";
+  "field-motion mt-2 w-full rounded-lg border bg-white px-3.5 py-3 text-sm text-foreground outline-none placeholder:text-agnos-muted/65 focus:ring-2 focus:ring-agnos-blue/20";
 
 export function FieldControl({
   field,
@@ -37,10 +37,16 @@ export function FieldControl({
   return (
     <div>
       <div className="flex items-center justify-between gap-3">
-        <label htmlFor={inputId} className="text-sm font-semibold">
+        <label htmlFor={inputId} className="text-sm font-semibold text-[#1a3048]">
           {field.label}
         </label>
-        <span className="text-xs font-semibold text-agnos-muted">
+        <span
+          className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+            field.required
+              ? "bg-agnos-warm-soft text-[#946200]"
+              : "bg-slate-100 text-agnos-muted"
+          }`}
+        >
           {field.required ? "Required" : "Optional"}
         </span>
       </div>
@@ -57,7 +63,7 @@ export function FieldControl({
           aria-describedby={hasError ? errorId : undefined}
           onBlur={onBlur}
           onChange={onChange}
-          className={`${controlClassName} resize-y`}
+          className={`${controlClassName} min-h-28 resize-y`}
         />
       ) : field.kind === "select" ? (
         <select

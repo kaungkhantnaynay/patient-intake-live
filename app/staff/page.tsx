@@ -3,26 +3,25 @@ import { StaffDashboard } from "@/components/intake/StaffDashboard";
 
 export default function StaffPage() {
   return (
-    <main className="min-h-screen bg-agnos-blue-dark px-6 py-8 text-white">
+    <main className="min-h-screen bg-background px-5 py-6 text-foreground sm:px-6">
       <div className="mx-auto w-full max-w-6xl">
         <Link
           href="/"
-          className="text-sm font-semibold text-agnos-cyan hover:text-agnos-cyan-soft"
+          className="pressable inline-flex rounded-md text-sm font-semibold text-agnos-blue hover:text-agnos-blue-dark focus:outline-none focus:ring-2 focus:ring-agnos-blue focus:ring-offset-2"
         >
-          Back to overview
+          Back
         </Link>
 
-        <header className="mt-8 border-b border-white/10 pb-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.12em] text-agnos-cyan">
+        <header className="mt-7 border-b border-agnos-border pb-7">
+          <p className="text-sm font-semibold uppercase tracking-[0.12em] text-agnos-blue">
             Staff View
           </p>
           <h1 className="mt-3 text-3xl font-semibold tracking-normal">
-            Staff monitoring dashboard
+            Intake monitor
           </h1>
-          <p className="mt-4 max-w-2xl leading-7 text-blue-100">
-            Review patient intake fields, status, and connection state from a
-            responsive dashboard. Supabase Realtime will feed this view in Phase
-            4.
+          <p className="mt-4 max-w-2xl leading-7 text-agnos-muted">
+            Track completion, patient activity, and field readiness from a calm
+            dashboard built for repeated review.
           </p>
         </header>
 

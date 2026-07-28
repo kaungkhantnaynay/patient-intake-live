@@ -3,26 +3,25 @@ import { PatientForm } from "@/components/intake/PatientForm";
 
 export default function PatientPage() {
   return (
-    <main className="min-h-screen bg-background px-6 py-8 text-foreground">
+    <main className="min-h-screen bg-background px-5 py-6 text-foreground sm:px-6">
       <div className="mx-auto w-full max-w-5xl">
         <Link
           href="/"
-          className="text-sm font-semibold text-agnos-blue hover:text-agnos-blue-dark"
+          className="pressable inline-flex rounded-md text-sm font-semibold text-agnos-blue hover:text-agnos-blue-dark focus:outline-none focus:ring-2 focus:ring-agnos-blue focus:ring-offset-2"
         >
-          Back to overview
+          Back
         </Link>
 
-        <header className="mt-8 border-b border-agnos-border pb-8">
+        <header className="mt-7 border-b border-agnos-border pb-7">
           <p className="text-sm font-semibold uppercase tracking-[0.12em] text-agnos-blue">
             Patient Form
           </p>
           <h1 className="mt-3 text-3xl font-semibold tracking-normal">
-            Patient intake form
+            Patient intake
           </h1>
           <p className="mt-4 max-w-2xl leading-7 text-agnos-muted">
-            Enter patient details below. Required fields are validated before
-            submission, and status tracking is ready for the live staff view in
-            the next phases.
+            Enter the details the care team needs before the visit. Required
+            fields validate as you move through the form.
           </p>
         </header>
 

@@ -29,27 +29,30 @@ export function FormProgress({
           <p className="text-sm font-semibold text-agnos-muted">
             Required completion
           </p>
-          <p className="mt-1 text-2xl font-semibold text-foreground">
-            {progress}%
+          <p className="mt-1 text-2xl font-semibold text-foreground tabular-nums">
+            {completedFields}
+            <span className="text-base font-semibold text-agnos-muted">
+              /{requiredFields}
+            </span>
           </p>
         </div>
-        <span className="rounded-full bg-agnos-cyan-soft px-3 py-1.5 text-sm font-semibold text-agnos-blue-dark">
+        <span className="rounded-full border border-agnos-cyan/30 bg-agnos-cyan-soft px-3 py-1.5 text-sm font-semibold text-agnos-blue-dark">
           {statusLabels[status]}
         </span>
       </div>
 
       <div
-        className="mt-4 h-2 overflow-hidden rounded-full bg-agnos-cyan-soft"
+        className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100"
         aria-hidden="true"
       >
         <div
-          className="h-full rounded-full bg-agnos-blue transition-all"
+          className="h-full rounded-full bg-agnos-blue transition-[width] duration-200 ease-[var(--ease-out)]"
           style={{ width: `${progress}%` }}
         />
       </div>
 
       <p className="mt-3 text-sm text-agnos-muted">
-        {completedFields} of {requiredFields} required fields complete.
+        {progress}% complete. You can submit once every required field is filled.
       </p>
     </div>
   );

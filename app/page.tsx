@@ -1,55 +1,91 @@
+import Image from "next/image";
 import Link from "next/link";
+import homepageBackground from "@/public/homepage-background.jpg";
 
 const routes = [
   {
     href: "/patient",
     title: "Patient Form",
-    description: "Open the responsive intake form for patient information.",
+    eyebrow: "For patients",
+    description:
+      "Complete demographics, visit details, and emergency contact information.",
+    action: "Start intake",
   },
   {
     href: "/staff",
     title: "Staff View",
-    description: "Open the live monitoring view for staff review.",
+    eyebrow: "For care teams",
+    description: "Monitor status, connection health, and intake field readiness.",
+    action: "Open dashboard",
   },
 ];
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
-      <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-5xl flex-col justify-center">
-        <p className="text-sm font-semibold uppercase tracking-[0.12em] text-agnos-blue">
-          Agnos Assessment
-        </p>
-        <div className="mt-4 max-w-3xl">
-          <h1 className="text-4xl font-semibold tracking-normal text-foreground sm:text-5xl">
-            Real-time patient intake
-          </h1>
-          <p className="mt-5 text-lg leading-8 text-agnos-muted">
-            Choose an interface to review the Phase 1 application skeleton. The
-            shared intake schema is ready for the patient form and staff
-            dashboard work in the next phase.
-          </p>
-        </div>
+    <main className="relative isolate min-h-screen overflow-hidden px-5 py-6 text-[#102033] sm:px-6">
+      <Image
+        src={homepageBackground}
+        alt=""
+        fill
+        preload
+        placeholder="blur"
+        sizes="100vw"
+        className="-z-20 object-cover object-[72%_center] md:object-center"
+      />
+      <div
+        className="absolute inset-0 -z-10 bg-white/80 sm:bg-white/70 md:bg-white/55 lg:bg-white/40"
+        aria-hidden="true"
+      />
+      <div
+        className="absolute inset-x-0 bottom-0 -z-10 h-1/2 bg-gradient-to-t from-background via-background/75 to-transparent"
+        aria-hidden="true"
+      />
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          {routes.map((route) => (
-            <Link
-              key={route.href}
-              href={route.href}
-              className="group rounded-lg border border-agnos-border bg-agnos-surface p-6 shadow-sm shadow-blue-950/5 transition hover:border-agnos-cyan hover:shadow-md focus:outline-none focus:ring-2 focus:ring-agnos-blue focus:ring-offset-2"
-            >
-              <span className="text-xl font-semibold text-foreground">
-                {route.title}
-              </span>
-              <span className="mt-3 block leading-7 text-agnos-muted">
-                {route.description}
-              </span>
-              <span className="mt-5 inline-flex text-sm font-semibold text-agnos-blue group-hover:text-agnos-blue-dark">
-                Open {route.title}
-              </span>
-            </Link>
-          ))}
-        </div>
+      <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-6xl flex-col">
+        <header className="flex items-center justify-between">
+          <p className="text-sm font-semibold uppercase tracking-[0.12em] text-agnos-blue">
+            Agnos Health
+          </p>
+        </header>
+
+        <section className="flex flex-1 flex-col justify-center pb-12 pt-16">
+          <div className="max-w-3xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.12em] text-agnos-blue">
+              Real-time patient intake
+            </p>
+            <h1 className="mt-4 text-4xl font-semibold tracking-normal text-balance sm:text-5xl">
+              Move patients from arrival to review with less friction.
+            </h1>
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-[#526a83]">
+              A focused intake workspace for patients and staff, with clear
+              validation, progress, and live-status surfaces ready for the
+              realtime connection.
+            </p>
+          </div>
+
+          <div className="mt-10 grid max-w-3xl gap-3 sm:grid-cols-2">
+            {routes.map((route) => (
+              <Link
+                key={route.href}
+                href={route.href}
+                className="pressable group rounded-lg border border-white/80 bg-white/90 p-5 shadow-lg shadow-blue-950/10 backdrop-blur hover:-translate-y-0.5 hover:border-agnos-cyan hover:bg-white focus:outline-none focus:ring-2 focus:ring-agnos-blue focus:ring-offset-2"
+              >
+                <span className="text-xs font-semibold uppercase tracking-[0.12em] text-agnos-blue">
+                  {route.eyebrow}
+                </span>
+                <span className="mt-2 block text-xl font-semibold text-[#102033]">
+                  {route.title}
+                </span>
+                <span className="mt-3 block leading-7 text-[#58708c]">
+                  {route.description}
+                </span>
+                <span className="mt-5 inline-flex text-sm font-semibold text-agnos-blue group-hover:text-agnos-blue-dark">
+                  {route.action}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
       </div>
     </main>
   );

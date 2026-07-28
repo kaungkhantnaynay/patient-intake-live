@@ -121,14 +121,14 @@ export function PatientForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-6">
+    <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-5">
       <FormProgress
         completedFields={completedRequiredFields}
         requiredFields={requiredIntakeFields.length}
         status={status}
       />
 
-      {Object.entries(intakeSections).map(([section, title]) => {
+      {Object.entries(intakeSections).map(([section, title], index) => {
         const fields = intakeFields.filter(
           (field) => field.section === section,
         );
@@ -138,7 +138,12 @@ export function PatientForm() {
             key={section}
             className="rounded-lg border border-agnos-border bg-agnos-surface p-5 shadow-sm shadow-blue-950/5"
           >
-            <h2 className="text-xl font-semibold text-foreground">{title}</h2>
+            <div className="flex items-center gap-3">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-agnos-cyan-soft text-sm font-semibold text-agnos-blue-dark">
+                {index + 1}
+              </span>
+              <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+            </div>
             <div className="mt-5 grid gap-5 md:grid-cols-2">
               {fields.map((field) => (
                 <div
@@ -166,11 +171,11 @@ export function PatientForm() {
         <p className="text-sm text-agnos-muted" aria-live="polite">
           {submittedAt
             ? `Form submitted successfully at ${submittedAt}.`
-            : "Your information is checked locally before submission."}
+            : "Your information is checked on this device before submission."}
         </p>
         <button
           type="submit"
-          className="inline-flex min-h-12 items-center justify-center rounded-lg bg-agnos-blue px-5 text-sm font-semibold text-white transition hover:bg-agnos-blue-dark focus:outline-none focus:ring-2 focus:ring-agnos-blue focus:ring-offset-2"
+          className="pressable inline-flex min-h-12 items-center justify-center rounded-lg bg-agnos-blue px-5 text-sm font-semibold text-white shadow-md shadow-blue-950/15 hover:bg-agnos-blue-dark focus:outline-none focus:ring-2 focus:ring-agnos-blue focus:ring-offset-2"
         >
           Submit Intake
         </button>
