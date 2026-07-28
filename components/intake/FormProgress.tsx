@@ -68,7 +68,9 @@ export function FormProgress({
       </div>
 
       <p className="mt-3 text-sm text-agnos-muted">
-        {progress}% complete. You can submit once every required field is filled.
+        {status === "submitted"
+          ? "Submission complete. Begin typing to start a new intake."
+          : `${progress}% complete. You can submit once every required field is filled.`}
       </p>
       <p
         className="mt-2 flex items-center gap-2 text-xs font-semibold text-agnos-muted"

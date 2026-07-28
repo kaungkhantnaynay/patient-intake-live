@@ -56,11 +56,6 @@ export default function Home() {
             <h1 className="mt-4 text-4xl font-semibold tracking-normal text-balance sm:text-5xl">
               Move patients from arrival to review with less friction.
             </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-[#526a83]">
-              A focused intake workspace for patients and staff, with clear
-              validation, progress, and live-status surfaces ready for the
-              realtime connection.
-            </p>
           </div>
 
           <div className="mt-10 grid max-w-3xl gap-3 sm:grid-cols-2">

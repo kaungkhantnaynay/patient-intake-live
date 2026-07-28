@@ -1,12 +1,15 @@
+import { z } from "zod";
 import { emptyPatientIntake, intakeFields } from "./schema";
 import { getSupabaseBrowserClient } from "./supabase";
+import {
+  patientIntakeSchema,
+  patientIntakeWireSchema,
+} from "./validation";
 import type {
   IntakeConnectionState,
   IntakeRealtimeEvent,
   IntakeRealtimeTransport,
-  PatientIntake,
   PatientIntakeField,
-  PatientStatus,
 } from "./types";
 
 const channelTopic = "patient-intake:demo";
@@ -22,11 +25,56 @@ const intakeRealtimeEventNames = {
 const patientFields = new Set<PatientIntakeField>(
   intakeFields.map((field) => field.name),
 );
-const patientStatuses = new Set<PatientStatus>([
+const patientStatusSchema = z.enum([
   "inactive",
   "active",
   "submitted",
 ]);
+const patientFieldSchema = z.custom<PatientIntakeField>(
+  (value) =>
+    typeof value === "string" &&
+    patientFields.has(value as PatientIntakeField),
+);
+const timestampSchema = z.string().refine(
+  (value) => !Number.isNaN(Date.parse(value)),
+  "Invalid timestamp.",
+);
+const realtimeEventSchema = z.discriminatedUnion("type", [
+  z
+    .object({
+      type: z.literal(intakeRealtimeEventNames.fieldUpdate),
+      field: patientFieldSchema,
+      value: z.string().max(500),
+      updatedAt: timestampSchema,
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal(intakeRealtimeEventNames.statusUpdate),
+      status: patientStatusSchema,
+      updatedAt: timestampSchema,
+    })
+    .strict(),
+  z
+    .object({
+      type: z.literal(intakeRealtimeEventNames.formReplace),
+      data: patientIntakeWireSchema,
+      status: patientStatusSchema,
+      updatedAt: timestampSchema,
+    })
+    .strict(),
+]);
+const realtimeEnvelopeSchema = z
+  .object({
+    event: z.union([
+      z.literal(intakeRealtimeEventNames.fieldUpdate),
+      z.literal(intakeRealtimeEventNames.statusUpdate),
+      z.literal(intakeRealtimeEventNames.formReplace),
+      z.literal(snapshotRequestEvent),
+    ]),
+    payload: z.unknown(),
+  })
+  .strict();
 
 type RealtimeEventName =
   (typeof intakeRealtimeEventNames)[keyof typeof intakeRealtimeEventNames];
@@ -102,83 +150,30 @@ export function getTransientIntakeSnapshot(): IntakeSnapshotEvent | null {
   };
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
+function parseRealtimeEvent(value: unknown): IntakeRealtimeEvent | null {
+  const result = realtimeEventSchema.safeParse(value);
 
-function hasValidTimestamp(value: unknown): value is string {
-  return typeof value === "string" && !Number.isNaN(Date.parse(value));
-}
-
-function parsePatientIntake(value: unknown): PatientIntake | null {
-  if (!isRecord(value)) {
+  if (!result.success) {
     return null;
   }
 
-  const parsedData = {} as PatientIntake;
+  if (
+    result.data.type === intakeRealtimeEventNames.formReplace &&
+    result.data.status === "submitted"
+  ) {
+    const submittedData = patientIntakeSchema.safeParse(result.data.data);
 
-  for (const field of intakeFields) {
-    const fieldValue = value[field.name];
-
-    if (typeof fieldValue !== "string") {
+    if (!submittedData.success) {
       return null;
     }
 
-    parsedData[field.name] = fieldValue;
-  }
-
-  return parsedData;
-}
-
-function parseRealtimeEvent(value: unknown): IntakeRealtimeEvent | null {
-  if (!isRecord(value) || !hasValidTimestamp(value.updatedAt)) {
-    return null;
-  }
-
-  if (
-    value.type === intakeRealtimeEventNames.fieldUpdate &&
-    typeof value.field === "string" &&
-    patientFields.has(value.field as PatientIntakeField) &&
-    typeof value.value === "string"
-  ) {
     return {
-      type: value.type,
-      field: value.field as PatientIntakeField,
-      value: value.value,
-      updatedAt: value.updatedAt,
+      ...result.data,
+      data: submittedData.data,
     };
   }
 
-  if (
-    value.type === intakeRealtimeEventNames.statusUpdate &&
-    typeof value.status === "string" &&
-    patientStatuses.has(value.status as PatientStatus)
-  ) {
-    return {
-      type: value.type,
-      status: value.status as PatientStatus,
-      updatedAt: value.updatedAt,
-    };
-  }
-
-  if (
-    value.type === intakeRealtimeEventNames.formReplace &&
-    typeof value.status === "string" &&
-    patientStatuses.has(value.status as PatientStatus)
-  ) {
-    const data = parsePatientIntake(value.data);
-
-    if (data) {
-      return {
-        type: value.type,
-        data,
-        status: value.status as PatientStatus,
-        updatedAt: value.updatedAt,
-      };
-    }
-  }
-
-  return null;
+  return result.data as IntakeRealtimeEvent;
 }
 
 function createSupabaseConnection(
@@ -282,11 +277,13 @@ function createLocalConnection(
   let closed = false;
 
   channel.addEventListener("message", (message: MessageEvent<unknown>) => {
-    if (!isRecord(message.data) || typeof message.data.event !== "string") {
+    const result = realtimeEnvelopeSchema.safeParse(message.data);
+
+    if (!result.success) {
       return;
     }
 
-    const envelope = message.data as RealtimeEnvelope;
+    const envelope = result.data as RealtimeEnvelope;
 
     if (envelope.event === snapshotRequestEvent) {
       options.onSnapshotRequest?.();
@@ -357,8 +354,14 @@ export function createIntakeRealtimeConnection(
   return {
     ...connection,
     publish: (event) => {
-      rememberTransientSnapshot(event);
-      return connection.publish(event);
+      const parsedEvent = parseRealtimeEvent(event);
+
+      if (!parsedEvent) {
+        return Promise.resolve(false);
+      }
+
+      rememberTransientSnapshot(parsedEvent);
+      return connection.publish(parsedEvent);
     },
   };
 }

@@ -64,9 +64,9 @@ origins. It is ephemeral and disappears when the pages close.
 ## Architecture
 
 - `lib/intake/schema.ts` is the canonical field definition.
-- `lib/intake/validation.ts` owns client-side validation.
+- `lib/intake/validation.ts` owns shared Zod validation and normalization.
 - `lib/intake/supabase.ts` creates the publishable-key-only browser client.
-- `lib/intake/realtime.ts` owns typed events, runtime message validation,
+- `lib/intake/realtime.ts` owns typed events, Zod message validation,
   Supabase Broadcast, local fallback, connection state, and snapshot recovery.
 - `components/intake/PatientForm.tsx` publishes field and status changes.
 - `components/intake/StaffDashboard.tsx` reconciles incoming events.
@@ -79,6 +79,9 @@ to browser storage by the application.
 For same-tab demos, the realtime boundary also retains the latest snapshot in
 JavaScript module memory while navigating between routes. This snapshot clears
 on page reload and is never written to browser storage or the database.
+
+The current demo has no persistence endpoint. If one is added, run the same
+`patientIntakeSchema` at that server boundary before writing patient data.
 
 Planning and implementation details live in `docs/frontend-assessment-plan.md`,
 `docs/rules.md`, and `docs/tasks.md`.

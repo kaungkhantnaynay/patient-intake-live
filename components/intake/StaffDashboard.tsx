@@ -47,7 +47,7 @@ function getConnectionLabel(
 ) {
   if (connectionState === "connected") {
     return transport === "supabase"
-      ? "Supabase live connection"
+      ? "Live updates connected"
       : "Local demo connected";
   }
 

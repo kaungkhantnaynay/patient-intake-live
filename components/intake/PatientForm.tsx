@@ -11,6 +11,7 @@ import {
   requiredIntakeFields,
 } from "@/lib/intake/schema";
 import {
+  parsePatientIntake,
   validateIntakeField,
   validatePatientIntake,
 } from "@/lib/intake/validation";
@@ -43,6 +44,7 @@ export function PatientForm() {
     useState<IntakeRealtimeTransport>("local");
   const dataRef = useRef<PatientIntake>(emptyPatientIntake);
   const statusRef = useRef<PatientStatus>("inactive");
+  const submittedSnapshotRef = useRef<PatientIntake | null>(null);
   const realtimeRef = useRef<IntakeRealtimeConnection | null>(null);
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [submittedAt, setSubmittedAt] = useState<string | null>(null);
@@ -55,9 +57,14 @@ export function PatientForm() {
 
   useEffect(() => {
     function publishCurrentSnapshot() {
+      const snapshotData =
+        statusRef.current === "submitted" &&
+        submittedSnapshotRef.current
+          ? submittedSnapshotRef.current
+          : dataRef.current;
       const snapshot: IntakeRealtimeEvent = {
         type: "form:replace",
-        data: dataRef.current,
+        data: snapshotData,
         status: statusRef.current,
         updatedAt: new Date().toISOString(),
       };
@@ -122,6 +129,8 @@ export function PatientForm() {
   }
 
   function handleFieldChange(field: PatientIntakeField, value: string) {
+    const startsNewIntake = statusRef.current === "submitted";
+
     markActive();
     setSubmittedAt(null);
     const nextData = {
@@ -131,12 +140,23 @@ export function PatientForm() {
 
     dataRef.current = nextData;
     setData(nextData);
-    publish({
-      type: "field:update",
-      field,
-      value,
-      updatedAt: new Date().toISOString(),
-    });
+
+    if (startsNewIntake) {
+      submittedSnapshotRef.current = null;
+      publish({
+        type: "form:replace",
+        data: nextData,
+        status: "active",
+        updatedAt: new Date().toISOString(),
+      });
+    } else {
+      publish({
+        type: "field:update",
+        field,
+        value,
+        updatedAt: new Date().toISOString(),
+      });
+    }
 
     if (touched[field]) {
       setErrors((currentErrors) => ({
@@ -178,21 +198,35 @@ export function PatientForm() {
       return;
     }
 
+    const validatedData = parsePatientIntake(data);
+
+    if (!validatedData) {
+      markActive();
+      setSubmittedAt(null);
+      return;
+    }
+
     if (idleTimerRef.current) {
       clearTimeout(idleTimerRef.current);
       idleTimerRef.current = null;
     }
 
     const submissionTime = new Date();
+    const clearedData = { ...emptyPatientIntake };
 
     statusRef.current = "submitted";
+    submittedSnapshotRef.current = validatedData;
     setStatus("submitted");
     publish({
       type: "form:replace",
-      data: dataRef.current,
+      data: validatedData,
       status: "submitted",
       updatedAt: submissionTime.toISOString(),
     });
+    dataRef.current = clearedData;
+    setData(clearedData);
+    setErrors({});
+    setTouched({});
     setSubmittedAt(submissionTime.toLocaleString());
   }
 
@@ -249,7 +283,7 @@ export function PatientForm() {
         <p className="text-sm text-agnos-muted" aria-live="polite">
           {submittedAt
             ? `Form submitted successfully at ${submittedAt}.`
-            : "Your information is checked on this device before submission."}
+            : "We check your responses for completeness before you submit."}
         </p>
         <button
           type="submit"
