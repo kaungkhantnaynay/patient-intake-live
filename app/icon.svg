@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Agnos patient intake logo">
+  <rect width="64" height="64" rx="16" fill="#eff8ff"/>
+  <path
+    d="M30.2 9.2a7.7 7.7 0 1 1 10.9 10.9L25.8 35.4a7.7 7.7 0 0 1-10.9-10.9L30.2 9.2Z"
+    fill="#d9efff"
+  />
+  <path
+    d="M31.4 9.8a6.2 6.2 0 1 1 8.8 8.8L24.7 34a6.2 6.2 0 0 1-8.8-8.8L31.4 9.8Z"
+    fill="none"
+    stroke="#1f82e5"
+    stroke-linecap="round"
+    stroke-width="4"
+  />
+  <path
+    d="M32.4 24.4 48 40a8.4 8.4 0 0 1-11.9 11.9L20.5 36.3"
+    fill="none"
+    stroke="#1f82e5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="4"
+  />
+  <circle cx="45" cy="14" r="5.5" fill="#eff8ff" stroke="#155fc4" stroke-width="4"/>
+  <circle cx="42.2" cy="43.4" r="5.4" fill="#eff8ff" stroke="#155fc4" stroke-width="3.6"/>
+  <circle cx="50.6" cy="48.8" r="3.4" fill="#eff8ff" stroke="#155fc4" stroke-width="3"/>
+  <path
+    d="M31.8 31.8 23.5 40a3.4 3.4 0 0 0 0 4.8l8.9 8.9a3.4 3.4 0 0 0 4.8 0l3.4-3.4"
+    fill="none"
+    stroke="#1f82e5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="4"
+  />
+</svg>
